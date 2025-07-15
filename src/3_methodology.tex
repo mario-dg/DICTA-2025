@@ -1,0 +1,93 @@
+\section{Methodology}
+\label{sec:methodology}
+Our methodology is structured into three distinct yet interconnected stages.
+These stages are: (1) training and unconditional diffusion model and generating synthetic brightfield microscopy images, (2) training and evaluating state-of-the-art object detection models using two sets of datasets with varying proportions of synthetic images replacing and adding real images, and
+(3) conducting an expert survey to assess the perceptual realism of generated images.
+This multi-faceted approach allows for a comprehensive investigation into the efficacy of synthetic data augmentation in the context of cell detection.
+
+\subsection{Image Generation with Diffusion Models}
+\label{subsec:image-generation-with-diffusion-models}
+The first stage of our methodology focuses on generating realistic synthetic brightfield microscopy images using an unconditional diffusion model.
+This stage involves dataset preparation, diffusion model training, model selection, and the final image generation process.
+
+The diffusion model was trained using a dataset of 10,000 patches ($512 \times 512$) extracted from real brightfield microscopy images.
+These images were acquired using a CELLAVISTA 3.1 RS HE high-throughput microscope (Synentec GmbH) with a $10\times$ objective lense, resulting in 8-bit grayscale images.
+The source material consisted of stably transfected CHO cells (CHO-K1 and CHO DG44 variants) expressing eGFP, imaged in 96-well plates at three different densities (300, 150, and 1 cell per well).
+
+Prior to training, raw subwell images ($3056 \times 3056$ pixels) were patchified into $512 \times 512$ pixel non-overlapping patches to increase the dataset size and focus the model on local cell features.
+Patches containing visible well edges, identified as dark arch artifacts due to light refraction at the well boundaries, were manually excluded to ensure the training data primarily comprised relevant cellular structures.
+The final dataset of 10,000 patches was randomly sampled from the filtered set of approximately 24,000 patches to manage computation resources within the scope of this research.
+For efficient data loading and processing during training, the dataset was converted into the Hugging Face Datasets format, stored as parquet files, which facilitates faster data access and management~\cite{vohra_apache_2016}.
+
+We employed unconditional diffusion models based on U-Net architectures and attention mechanisms as the backbone for image generation.
+The U-Net architecture was chosen for its proven effectiveness in image generation and segmentation tasks, particularly in biomedical imaging, due to its ability to capture both local and global context through its encode-decoder structure and skip connections~\cite{ronneberger_u-net_2015}.
+The specific U-Net architecture implemented consists of downsampling and upsampling blocks with residual connections to facilitate gradient flow and improve training stability.
+Attention mechanisms were optionally incorporated into both the downsampling and upsampling paths in some model variants to investigate their impact on image generation quality.
+The number of up and down blocks, channel configurations and the placement of attention blocks were varied across different model configurations to evaluate architectural choices.
+
+The diffusion model was trained using the DDIM scheduler~\cite{song_denoising_2020} for efficient sampling during training and to explore faster inference capabilities.
+The model was trained for 350 epochs using the AdamW optimizer with a learning rate of $10^{-4}$.
+Moving Average (EMA) with a decay of 0.9999 was applied to the model weights to stabilize training and potentially improve generalization.
+A batch size of 4 was used, constrained by GPU memory limitations.
+Training was performed using Distributed Data Parallel (DDP) across two NVIDIA A100-SXM4-40GB GPUs with mixed precision (float16) enabled using PyTorch Lightning~\cite{falcon_pytorchlightningpytorch-lightning_2020} to accelerate training.
+
+Model selection was based on a combination of visual inspection of generated samples and quantitative evaluation using the Fréchet Inception Distance (FID) scores.
+FID scores were calculated against a held-out set of real images to objectively measure the similarity between the distributions of real and generated images and computed every 10 epochs to track training progress and identify optimal model states.
+
+For the final synthetic image generation, the Euler Ancestral scheduler was chosen for its balance of sample quality and generation speed, determined through empirical testing of various schedulers.
+Trailing timestep spacing and epsilon prediction type were used based on hyperparameter optimization experiments that indicated these settings produced visually superior results for our dataset.
+To introduce variability and potentially enhance the robustness of the downstream object detectors, the number of inference steps during the final generation process was randomized between 35 and 40 steps for each batch of 16 images.
+A total of 10,000 synthetic images were generated using this optimized configuration to create datasets for object detection model training.
+
+\subsection{Cell Detection Model Training and Evaluation}
+\label{subsec:cell-detection-model-training-and-evaluation}
+The second stage of our methodology involved training and evaluating state-of-the-art object detection models using datasets incorporating varying proportions of synthetic images.
+This stage aimed to quantify the impact of synthetic data augmentation on cell detection performance.
+
+We created six datasets containing synthetic images and a baseline dataset consisting of 5,000 real images (\textit{scc\_real}).
+The baseline dataset served as a control to evaluate the performance of detection models trained solely on real data.
+To investigate the effect of replacing real images with synthetic ones, three datasets (\textit{scc\_10}, \textit{scc\_30}, \textit{scc\_50}) were created where 10\%, 30\%, and 50\% of the real images in the training set where replaced with synthetic images, respectively.
+\textit{scc\_add\_10}, \textit{scc\_add\_30}, \textit{scc\_add\_50} were created with the same proportions of synthetic images added to the training set, keeping the original real images intact and increasing the total dataset size.
+
+The remaining images from the real dataset (beyond the 5,000 training images) were allocated to fixed validation (2,527 images) and test (16,758 images) sets, ensuring consistent evaluation across all training configurations.
+These large validation and test sets kept constant across all experiments to provide robust and statistically meaningful performance comparisons.
+
+Real images were labeled using a semi-automated approach that combined fluorescence channel information with manual verification.
+First, a classical image processing algorithm was implemented to automatically detect cells in the fluorescence channel (eGFP signal).
+This algorithm involved binarizing the fluorescence image, finding contours corresponding to fluorescent signals, and generating bounding boxes around these contours.
+The automatically generated bounding boxes were then manually reviewed and refined by a human expert using the Roboflow annotation tool~\cite{dwyer_roboflow_nodate} to ensure accuracy and correct any errors from the automated process.
+This hybrid approach significantly reduced the manual labeling effort while maintaining high-quality annotations.
+
+Synthetic images were labeled using a model-assisted labeling approach.
+A pretrained YOLOv8m model was fine-tuned on a subset of real labeled images.
+This fine-tuned YOLOv8m model was integrated into the Roboflow annotation tool's ``Model-Assisted Labeling'' feature.
+These model-predicted bounding boxes were also manually reviewed and refined by a human expert to correct any inaccuracies, missed detections or false positives, to ensure consistency between real and synthetic image labelling.
+This approach leveraged the pre-trained object detection model to expedite the labeling of synthetic data, while manual refinement ensured the final labels were of high quality.
+
+We fine-tuned three state-of-the-art object detection model families: YOLOv8 (sizes s, m, x)~\cite{jocher_ultralytics_2023}, YOLOv9 (sizes c, e)~\cite{Wang2024YOLOv9LW}, and RT-DETR (sizes l, x)~\cite{Lv2023DETRsBY}.
+These models were chosen for their state-of-the-art performance, diverse architectures (CNN-based and Transformer-based), and availability within the Ultralytics framework~\cite{jocher_ultralytics_2023}, which facilitated consistent training and evaluation.
+All models were pre-trained on the COCO dataset~\cite{tsung-yi_lin_microsoft_2014} and fine-tuned on our cell detection datasets to leverage transfer learning, accelerate training and reduce the amount of data required for training.
+
+Models were trained for 200 epochs using default Ultralytics augmentation settings, which include mosaic augmentation, mixup augmentation, and color space augmentations (HSV) to enhance model robustness and generalization.
+An early stopping mechanism with a patience of 35 epochs was employed to prevent overfitting and optimize training time.
+Training was performed on a single NVIDIA GeForce RTX 3090 GPU with 24GB of memory.
+
+Model performance was evaluated on the held-out test set of 16,758 real images.
+Performance metrics included mean Average Precision (mAP) at IoU thresholds of 0.5 (mAP@50), 0.75 (mAP@75), and averages across 0.5 to 0.95 (mAP@50:95).
+mAP\@50 was chosen as the primary metric for performance comparison, as it provides a robust measure of detection accuracy while being less sensitive to precise boundary delineation, which is less critical in our single cell detection task focused on identifying and localizing cells rather than detailed morphological analysis.
+However, mAP\@75 and mAP\@50:95 were also reported to provide a more comprehensive performance profile across different IoU thresholds.
+
+\subsection{Expert Survey for Image Realism}
+\label{subsec:expert-survey-for-image-realism}
+To subjectively assess the perceptual realism of the generated synthetic images, we conducted a survey involving 11 microscopy experts and biologists from Synentec GmbH.
+These experts possess extensive experience in microscopy image analysis and cell biology, making them ideal judges of image realism in this domain.
+
+Participants were presented with 30 randomly ordered images, consisting of 20 synthetic images generated by our diffusion model and 10 real brightfield microscopy images from our dataset, ensuring a balanced representation of both image types without revealing the true ratio to participants.
+For each image, participants were asked to clarify it as either ``real'' or ``synthetic'' and to rate their confidence in their classification on a scale from 1 (low confidence) to 5 (high confidence).
+Furthermore, if participants classified an image as ``generated'', they were prompted to provide a brief textual explanation detailing the visual cues or artifacts that led to their decision.
+
+We analyzed the classification accuracy of the experts, calculating overall accuracy as well as accuracy separately for real and synthetic images.
+We also collected and analyzed the textual explanations provided by participants for images they classified as generated.
+These textual explanations were analyzed qualitatively to identify recurring themes and visual features that experts associated with synthetic images.
+
+This comprehensive methodology, combining quantitative evaluations of object detection performance with subjective assessments of image realism by expert human observers, provides a robust framework for investigating the impact of synthetic data augmentation in brightfield microscopy cell detection.

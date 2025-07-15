@@ -1,0 +1,18 @@
+\section{Conclusion}
+\label{sec:conclusion}
+This paper provides a comprehensive investigation into the use of diffusion-based synthetic brightfield microscopy images for enhancing single cell detection.
+Our expert survey demonstrates the remarkable realism of diffusion-generated images, achieving near-indistinguishability from real microscopy acquisitions.
+Object detection experiments reveal that models trained with synthetic data, especially when added to real data in \textbf{augmentation datasets} to increase dataset size, achieve comparable, and in some cases,
+improved performance to real-data training, particularly for simpler cell localization (mAP\@50) and even showing benefits for higher IoU thresholds in some augmentation scenarios.
+While subtle limitations exist in  replicating fine cell boundary details and achieving optimal performance at the highest IoU thresholds, our findings strongly highlight the promise of diffusion-based synthetic data generation as a valuable tool for microscopy image analysis.
+It is important to note that this study was primarily designed to evaluate the general potential of synthetic data for training single-cell detection models, rather than to achieve state-of-the-art performance.
+Consequently, we did not perform extensive hyperparameter tuning or explore advanced data augmentation techniques beyond the default settings provided by the Ultralytics framework.
+This approach offers a pathway to address data scarcity, reduce annotation burdens, and potentially improve the robustness and accessibility of advanced cell detection techniques in biological and medical research,
+particularly by leveraging the benefits of increased dataset size through synthetic data augmentation.
+Future research directions should focus on refining diffusion models for brightfield microscopy image generation, improving the fidelity in capturing fine cellular details,
+exploring conditional generation strategies for broader applicability across diverse microscopy modalities and biological contexts, and further investigating the optimal strategies for integrating synthetic data into training pipelines
+to maximize the benefits for cell detection and other microscopy image analysis tasks, including exploring the optimal balance between real and synthetic data and the impact of dataset size scaling with synthetic data,
+as well as investigating the impact of more extensive hyperparameter optimization and advanced data augmentation strategies when using synthetic data.
+
+Upon acceptance of this paper, we commit to making our dataset, trained object detection models, and associated training code publicly available.
+The datasets, models and code will be released no later than the camera-ready deadline.

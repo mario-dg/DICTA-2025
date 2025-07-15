@@ -1,0 +1,37 @@
+\section{Related Work}
+\label{sec:related-work}
+Synthetic microscopy image generation has become an increasingly important area of research, driven by the need for large, annotated datasets for training and validating image analysis algorithms.
+Generating synthetic data offers a promising avenue to overcome the limitations of acquiring and annotating real microscopy images, which are often expensive, time-consuming, and require expert knowledge.
+Early approaches to synthetic microscopy image generation relied on rule-based models and physical simulations~\cite{david_svoboda_generation_2012,david_svoboda_towards_2013,rajaram_simucell_2012}.
+These methods, while offering control over image parameters and ground truth generation, were often limited in their ability to capture the full complexity and biological diversity observed in real-world microscopy data.
+
+Early works in synthetic microscopy image generation focused on creating controlled datasets for algorithm development and validation.
+Svoboda \etal pioneered in the generation of fully 3D synthetic brightfield microscopy time-lapse sequences, modeling cell shapes, structures, and motion~\cite{david_svoboda_generation_2012}.
+This work was further extended to simulate realistic cell population distributions in 3D by controlling cell count and clustering probability~\cite{david_svoboda_towards_2013}.
+SimuCell, developed by Rajaram \etal~\cite{rajaram_simucell_2012}, is another example of a simulation-based approach, aiming to mimic brightfield microscopy images for cell segmentation algorithm development.
+These methods, based on predefined rules and physical models, provided valuable initial datasets for testing algorithms, particularly for segmentation and tracking.
+However, their inherent limitations in replicating the intricate textures, subtle variations, and artifacts present in real biological images restricted their utility for training more sophisticated, data-driven models, especially deep learning approaches.
+
+The advent of deep learning, particularly Generative Adversarial Networks (GANs), marked a significant shift in synthetic image generation.
+GANs offered the potential to learn complex data distributions directly from real images, leading to more realistic and diverse synthetic ouputs.
+In the context of microscopy, GANs have been extensively explored for various tasks.
+Cross-modality translation, aiming to predict fluorescence microscopy images from brightfield inputs, has been a prominent application.
+Christiansen \etal introduced ``In Silico Labeling'' (ISL) using deep learning to predict fluorescence labels from transmitted light images~\cite{christiansen_silico_2018}.
+Building upon this, Lee \etal developed DeepHCS and DeepHCS++ to transform brightfield images into multiple fluorescence channels relevant for high-contrast screening, leveraging adversarial losses for realism~\cite{gyuhyun_lee_deephcs_2018,gyuhyun_lee_deephcs_2021}.
+GANs have also been applied to enhance image quality achieving super-resolution under a large field-of-view~\cite{zhang_high-throughput_2019} and generate isolate cell images approximating the shape and texture distributions of cell components~\cite{marin_scalbert_generic_2019}.
+Despite these successes, GANs are known to suffer from training instability and mode collapse, limiting the diversity and reliability of generated samples, particularly when training data is scarce, complex or imbalanced, as often encountered in microscopy~\cite{juan_c_caicedo_evaluation_2019,ricard_durall_combating_2020}.
+
+
+Diffusion models, inspired by non-equilibrium thermodynamics and rooted in denoising score matching, offer improved training stability, sample quality and diversity~\cite{jascha_sohl-dickstein_deep_2015,ho_denoising_2020,song_denoising_2020}.
+These models have demonstrated state-of-the-art performance in various image generation tasks and are increasingly being explored in microscopy:
+Cross-Zamirski \etal introduced a class-guided diffusion model to generate cell painting images from brightfield data, along with class labels, demonstrating the potential for controlled image synthesis~\cite{cross-zamirski_class-guided_2023}.
+Della Maggiora \etal presented a conditional variational diffusion model for super-resolution microscopy and quantitative phase imaging, focusing on improving the noise schedule learning during training~\cite{gabriel_della_maggiora_conditional_2023}.
+In electron microscopy, Lu \etal developed EMDiffuse, a suite of algorithms based on diffusion models for image enhancement, reconstruction, and generation, showcasing the versatility of these models across different microscopy modalities~\cite{lu_diffusion-based_2024}.
+Li \etal proposed a physics-informed diffusion model (PI-DDPM) that incorporates the physical model of microscopy image formation into the loss function, leading to improved reconstructions with reduced artifacts compared to regular DDPMs when trained on synthetic microscopy data~\cite{li_microscopy_2023}.
+These works highlight the growing interest in diffusion models for various microscopy image synthesis and enhancement tasks, demonstrating their capability to generate high-quality and diverse samples.
+
+While diffusion models are increasingly used in microscopy image generation, research on their direct application for enhancing \textbf{object detection}, specifically in the challenging domain of brightfield microscopy, remains significantly limited.
+Existing studies primarily focus on image generation quality evaluation and downstream tasks like segmentation or image-based profiling.
+The critical question of whether and how diffusion-based synthetic brightfield microscopy images can effectively improve the performance of object detection models for single cell detection has not been systematically addressed.
+This work is directly pertinent to the aforementioned issue by undertaking a comprehensive evaluation of the impact on diffusion-based synthetic brightfield microscopy image data on single cell detection performance.
+By focusing on object detection, this research contributes a novel perspective to the field, exploring the practical utility of synthetic data for a fundamental task in quantitative microscopy.

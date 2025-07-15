@@ -1,0 +1,73 @@
+\documentclass[conference,a4paper]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+%Template version as of 6/27/2024
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{multirow}
+\usepackage{subcaption}
+\usepackage{colortbl}
+\usepackage{tabularray}
+\usepackage{booktabs}
+\usepackage[table]{xcolor}
+\definecolor{cvprblue}{rgb}{0.21,0.49,0.74}
+\usepackage[pagebackref,breaklinks,colorlinks,allcolors=cvprblue]{hyperref}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+
+\title{Diffusion-Based Synthetic Brightfield Microscopy Images for Enhanced Single Cell Detection}
+
+%\author{\IEEEauthorblockN{1\textsuperscript{st} Mario de Jesus da Graca}
+%\IEEEauthorblockA{
+%\textit{Synentec GmbH}\\
+%Elmshorn, Germany \\
+%m.dagraca@synentec.com}
+%\and
+%\IEEEauthorblockN{2\textsuperscript{nd} Prof. Dr. Jörg Dahlkemper}
+%\IEEEauthorblockA{\textit{Computer Science} \\
+%\textit{Hamburg University of Applied Sciences}\\
+%Hamburg, Germany \\
+%joerg.dahlkemper@haw-hamburg.de}
+%\and
+%\IEEEauthorblockN{3\textsuperscript{rd} Prof. Dr. Peer Stelldinger}
+%\IEEEauthorblockA{\textit{Computer Science} \\
+%\textit{Hamburg University of Applied Sciences}\\
+%Hamburg, Germany \\
+%peer.stelldinger@haw-hamburg.de}
+%}
+
+\maketitle
+
+\begin{abstract}
+    Accurate single cell detection in brightfield microscopy is crucial for biological research, yet data scarcity and annotation bottlenecks limit the progress of deep learning methods.
+    We investigate the use of unconditional models to generate synthetic brightfield microscopy images and evaluate their impact on object detection performance.
+    A U-Net based diffusion model was trained and used to create datasets with varying ratios of synthetic and real images.
+    Experiments with YOLOv8, YOLOv9 and RT-DETR reveal that training with synthetic data can achieve improved detection accuracies (at minimal costs).
+    A human expert survey demonstrates the high realism of generated images, with experts not capable to distinguish them from real microscopy images (accuracy 50\%).
+    Our findings suggest that diffusion-based synthetic data generation is a promising avenue for augmenting real datasets in microscopy image analysis, reducing the reliance on extensive manual annotation and potentially improving the robustness of cell detection models.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Microscopy Image Generation, Brightfield, Diffusion Models, Synthetic Data, Data Augmentation, Object Detection, Single Cell Detection
+\end{IEEEkeywords}
+
+\input{1_introduction}
+\input{2_relatedwork}
+\input{3_methodology}
+\input{4_experimentsandresults}
+\input{5_discussion}
+\input{6_conclusion}
+
+{
+    \small
+    \bibliographystyle{IEEEtranS}
+    \bibliography{main}
+}
+
+\end{document}
